@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Hash MD5</title>
+</head>
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.9.1/firebase-storage.js"></script>
+    <h1>Gerador de Hash MD5</h1>
+    <input type="file" id="fileInput" accept=".txt">
+
+    <form>
+        <label for="sim">
+            <input type="checkbox" id="malicioso" name="malicioso" value="malicioso"> É malicioso?
+        </label><br>
+    </form>
+    <button onclick="generateAndSaveMD5Hash()">Enviar</button>
+    <p>Hash MD5:</p>
+    <div id="md5Hash"></div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyA9eU-g06F9-FJeXNgqI4jsTEVypAv94RU",
+            authDomain: "hashmd5-ccbf0.firebaseapp.com",
+            projectId: "hashmd5-ccbf0",
+            storageBucket: "hashmd5-ccbf0.appspot.com",
+            messagingSenderId: "92162897467",
+            appId: "1:92162897467:web:2203b6eb565ed4da4f8e1e",
+            measurementId: "G-BJJHDJSSEZ"
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        function generateMD5Hash(fileContent) {
+            return CryptoJS.MD5(fileContent).toString();
+        }
+
+        function saveMD5Hash(md5Hash) {
+            // Referência ao Firebase Storage (substitua 'seu-caminho-no-storage' pelo caminho desejado)
+            const storageRef = firebase.storage().ref('hashes/' + md5Hash);
+
+            // Faça o upload do hash MD5 como um arquivo de texto
+            return storageRef.putString(md5Hash).then(function(snapshot) {
+                console.log('Hash MD5 salvo com sucesso no Firebase Storage.');
+            }).catch(function(error) {
+                console.error('Erro ao salvar o hash MD5 no Firebase Storage:', error);
+            });
+        }
+
+        function generateAndSaveMD5Hash() {
+            const fileInput = document.getElementById('fileInput');
+            const md5Hash = document.getElementById('md5Hash');
+
+            const file = fileInput.files[0];
+
+            if (file) {
+                const reader = new FileReader();
+
+                reader.onload = function(event) {
+                    const fileContent = event.target.result;
+                    const hash = generateMD5Hash(fileContent);
+                    md5Hash.textContent = hash;
+                    saveMD5Hash(hash);
+                };
+
+                reader.readAsText(file);
+            } else {
+                md5Hash.textContent = 'Selecione um arquivo primeiro.';
+            }
+        }
+    </script>
+</body>
+</html>
